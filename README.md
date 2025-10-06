@@ -14,17 +14,15 @@ npm i -g @nestjs/cli
 npm install
 
 ```
-4. levantar la base de datos
+4. Levantar la base de datos y ejecucion de la aplicacion
 ```
 docker-compose up -d 
 ```
-5. Ejecutar la aplicacion en dev:
-```
-npm run start:dev
-```
+
 ## stack usado
 * PostgreSQL
 * Nest
+* Docker
 ## ENDPOINT LISTOS
 * GET usuarios
 * GET(id) usuarios
