@@ -34,9 +34,11 @@ npm run start:dev
 ```
 http://localhost:3000/usuarios
 ```
-
 * GET productos
-
+* GET(id) productos
+* POST productos
+* PATCH productos
+* DELETE productos
 ```
 http://localhost:3000/productos
 ```
