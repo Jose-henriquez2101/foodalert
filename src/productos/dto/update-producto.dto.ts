@@ -1,21 +1,29 @@
-import { IsOptional, IsString, IsUUID } from 'class-validator';
-import { CreateProductoDto } from './create-producto.dto';
+import { IsOptional, IsString, IsNumber, MinLength, Min, IsEnum } from 'class-validator';
 
 export class UpdateProductoDto {
-    
-    @IsString()
-    @IsOptional()
-    readonly nombre?: string;
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  readonly nombre?: string;
 
-    @IsOptional()
-    @IsString()
-    readonly cantidad?: number;
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  readonly cantidad?: number;
 
-    @IsOptional()
-    @IsString()
-    readonly unidadMedida?: string;
+  @IsOptional()
+  @IsString()
+  readonly unidadMedida?: string;
 
-    @IsOptional()
-    @IsString()
-    readonly categoria?: string;
+  @IsOptional()
+  @IsString()
+  readonly categoria?: string;
+
+  @IsOptional()
+  @IsNumber()
+  readonly fechaCaducidad?: number;
+
+  @IsOptional()
+  @IsEnum(['vigente', 'proximo_a_vencer', 'caducado'])
+  readonly estado?: 'vigente' | 'proximo_a_vencer' | 'caducado';
 }
