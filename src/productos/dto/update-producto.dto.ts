@@ -1,22 +1,21 @@
-import { IsOptional, IsString, IsUUID } from "class-validator";
-
+import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { CreateProductoDto } from './create-producto.dto';
 
 export class UpdateProductoDto {
-    @IsUUID()
-    @IsOptional()
-    @IsString()
-    readonly id?: string;
     
-    @IsOptional()
     @IsString()
+    @IsOptional()
     readonly nombre?: string;
 
     @IsOptional()
     @IsString()
-    readonly descripcion?: string;
+    readonly cantidad?: number;
 
     @IsOptional()
     @IsString()
-    readonly ingredientes?: string;
+    readonly unidadMedida?: string;
 
+    @IsOptional()
+    @IsString()
+    readonly categoria?: string;
 }
