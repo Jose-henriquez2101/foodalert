@@ -24,6 +24,10 @@ docker-compose up -d
 * Nest
 * Docker
 ## ENDPOINT LISTOS
+* GET seed (obtencion de datos preestablecidos para llenar la bbdd)
+```
+http://localhost:3000/seed
+```
 * GET usuarios
 * GET(id) usuarios
 * POST usuarios
