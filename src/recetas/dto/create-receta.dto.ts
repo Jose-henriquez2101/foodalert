@@ -38,4 +38,9 @@ export class CreateRecetaDto {
   @ArrayUnique()
   @IsUUID('all', { each: true })
   productoIds?: string[];
+
+  // Relación con Usuario (autor de la receta)
+  @IsOptional()
+  @IsUUID()
+  usuarioId?: string;
 }

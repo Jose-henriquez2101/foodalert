@@ -1,5 +1,6 @@
-import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, JoinTable,} from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, JoinTable, ManyToOne, JoinColumn } from 'typeorm';
 import { Product } from '../../productos/entities/product.entity';
+import { Usuario } from '../../usuarios/entities/usuario.entity';
 
 @Entity()
 export class Receta {
@@ -33,4 +34,11 @@ export class Receta {
     inverseJoinColumn: { name: 'productId', referencedColumnName: 'id' },
   })
   productos?: Product[];
+
+  @ManyToOne(() => Usuario, (usuario) => usuario.recetas, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'usuarioId' })
+  usuario?: Usuario;
+
+  @Column({ nullable: true })
+  usuarioId?: string;
 }
