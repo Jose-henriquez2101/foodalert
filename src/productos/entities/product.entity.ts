@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Categoria } from 'src/categorias/entities/categoria.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class Product {
@@ -14,8 +15,8 @@ export class Product {
   @Column()
   unidadMedida: string; // ej: "kg", "litros", "unidades"
 
-  @Column()
-  categoria: string; // ej: "Lácteos", "Carnes", "Verduras"
+  @ManyToOne(() => Categoria, categoria => categoria.productos)
+  categoria: Categoria;
 
   @Column()
   fechaCaducidad: number;
