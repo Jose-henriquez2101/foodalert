@@ -1,17 +1,26 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class Receta {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    nombre: string;
+  @Column()
+  nombreReceta: string;
 
-    @Column()
-    descripcion: string;
+  @Column({ nullable: true })
+  descripcion?: string;
 
-    @Column()
-    ingredientes: string; 
-    
+  @Column('json')
+  ingredientes: {
+    productId: string;
+    cantidadUsada: number;
+    unidad: string;
+  }[];
+
+  @Column({ nullable: true })
+  tiempoPreparacion?: number;
+
+  @CreateDateColumn()
+  fechaCreacion: Date;a
 }
