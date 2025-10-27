@@ -72,9 +72,24 @@ export class CategoriaRepository {
     if ((savedUpdated as any).usuario) delete (savedUpdated as any).usuario;
     return savedUpdated as Categoria;
     }
+
     async delete(id: string): Promise<void> {
-        const categoria = await this.findOneById(id);
-        await this.categoriaRepo.delete(categoria);
+    const categoria = await this.findOneById(id);
+
+        try {
+            await this.categoriaRepo.remove(categoria);
+        } catch (error) {
+            console.error('Error al eliminar categoría:', error);
+
+            if (error.code === '23503') {
+            throw new Error(
+                'No se puede eliminar la categoría porque está asociada a uno o más productos.'
+            );
+            }
+
+            throw new Error('Error inesperado al eliminar la categoría.');
+        }
     }
+
 
 }

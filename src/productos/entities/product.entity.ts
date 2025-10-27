@@ -16,8 +16,11 @@ export class Product {
   @Column()
   unidadMedida: string; // ej: "kg", "litros", "unidades"
 
-  @ManyToOne(() => Categoria, categoria => categoria.productos)
+  @ManyToOne(() => Categoria, categoria => categoria.productos, {
+  onDelete: 'SET NULL',
+  })
   categoria: Categoria;
+
 
   @ManyToOne(() => Usuario, (usuario) => usuario.productos, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'usuarioId' })

@@ -25,7 +25,22 @@ export class CategoriasService {
     return this.categoriasRepository.update(id, updateCategoriaDto);
   }
 
-  remove(id: string): Promise<void> {
-    return this.categoriasRepository.delete(id);
+  async remove(id: string): Promise<void> {
+  const categoria = await this.findOne(id);
+
+  try {
+    await this.categoriasRepository.delete(id);
+  } catch (error) {
+    console.error('Error al eliminar categoría:', error);
+
+    if (error.code === '23503') {
+      throw new Error(
+        'No se puede eliminar la categoría porque está asociada a uno o más productos.'
+      );
+    }
+
+    throw new Error('Error inesperado al eliminar la categoría.');
   }
+  }
+
 }
