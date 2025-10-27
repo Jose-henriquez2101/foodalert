@@ -44,3 +44,12 @@ http://localhost:3000/usuarios
 ```
 http://localhost:3000/productos
 ```
+```
+http://localhost:3000/categorias
+```
+* GET categorias
+* GET(id) categorias
+* POST categorias
+* PATCH categorias
+* DELETE categorias
+```
