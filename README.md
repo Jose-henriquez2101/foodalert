@@ -28,22 +28,24 @@ http://localhost:3000/seed
 * Nest
 * Docker
 ## ENDPOINT LISTOS
+```
+http://localhost:3000/usuarios
+```
 * GET usuarios
 * GET(id) usuarios
 * POST usuarios
 * PATCH usuarios
 * DELETE usuarios
+
 ```
-http://localhost:3000/usuarios
+http://localhost:3000/productos
 ```
 * GET productos
 * GET(id) productos
 * POST productos
 * PATCH productos
 * DELETE productos
-```
-http://localhost:3000/productos
-```
+
 ```
 http://localhost:3000/categorias
 ```
@@ -53,3 +55,10 @@ http://localhost:3000/categorias
 * PATCH categorias
 * DELETE categorias
 ```
+http://localhost:3000/recetas
+```
+* GET recetas
+* GET(id) recetas
+* POST recetas
+* PATCH recetas
+* DELETE recetas
