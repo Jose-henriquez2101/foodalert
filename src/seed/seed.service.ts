@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Product } from '../productos/entities/product.entity';
+import { RecetaProducto } from '../recetas/entities/receta-producto.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { Receta } from '../recetas/entities/receta.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -29,7 +30,8 @@ export class SeedService {
     // Repositorios
     const productRepo = this.dataSource.getRepository(Product);
     const usuarioRepo = this.dataSource.getRepository(Usuario);
-    const recetaRepo = this.dataSource.getRepository(Receta);
+  const recetaRepo = this.dataSource.getRepository(Receta);
+  const recetaProductoRepo = this.dataSource.getRepository(RecetaProducto);
 
     
     // -------------------- USUARIOS --------------------
@@ -110,21 +112,30 @@ export class SeedService {
     }
 
     // -------------------- RECETAS --------------------
+    // Definir recetas con items que incluyen nombre de producto + cantidad + (opcional) unidad
     const recetas = [
       {
         nombre: 'Café Mocha',
         descripcion: 'Café con leche y chocolate',
-        productoIds: ['Leche Entera', 'Azúcar'],
+        productoItems: [
+          { name: 'Leche Entera', cantidadUsada: 0.2 },
+          { name: 'Azúcar', cantidadUsada: 0.02 },
+        ],
       },
       {
         nombre: 'Tostada Integral',
         descripcion: 'Pan integral con aguacate',
-        productoIds: ['Pan de molde'],
+        productoItems: [
+          { name: 'Pan de molde', cantidadUsada: 1 },
+        ],
       },
       {
         nombre: 'Ensalada de Tomate',
         descripcion: 'Tomates frescos con aceite de oliva',
-        productoIds: ['Tomate', 'Aceite de oliva'],
+        productoItems: [
+          { name: 'Tomate', cantidadUsada: 0.2 },
+          { name: 'Aceite de oliva', cantidadUsada: 0.01 },
+        ],
       },
     ];
 
@@ -141,13 +152,23 @@ export class SeedService {
           usuarioId: owner?.id,
         } as any);
 
-        let saved = await recetaRepo.save(receta as any);
+        const saved = await recetaRepo.save(receta as any);
 
-        // attach productos relation
-        const productosRelacion = r.productoIds.map((name) => productsMap.get(name)).filter(Boolean);
+        // create receta_producto entries using productoItems (map by product name)
+        const productosRelacion = r.productoItems
+          .map((it) => ({ item: it, product: productsMap.get(it.name) }))
+          .filter((x) => x.product) as { item: any; product: Product }[];
+
         if (productosRelacion.length > 0) {
-          saved.productos = productosRelacion as any;
-          saved = await recetaRepo.save(saved as any);
+          const rpEntities = productosRelacion.map(({ item, product }) =>
+            recetaProductoRepo.create({
+              recetaId: saved.id,
+              productId: product.id,
+              cantidadUsada: item.cantidadUsada ?? 1,
+              unidad: item.unidad ?? product.unidadMedida,
+            } as any),
+          );
+          await recetaProductoRepo.save(rpEntities as any);
         }
       }
     }

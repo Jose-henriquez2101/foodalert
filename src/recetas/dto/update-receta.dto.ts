@@ -1,4 +1,20 @@
-import { IsOptional, IsString, MinLength, IsArray, IsNumber, Min, IsUUID, ArrayUnique } from 'class-validator';
+import { IsOptional, IsString, MinLength, IsArray, IsNumber, Min, IsUUID, ArrayUnique, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class ProductoItemDto {
+  @IsUUID()
+  productId: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  cantidadUsada?: number;
+
+  @IsOptional()
+  @IsString()
+  unidad?: string;
+}
+
 export class UpdateRecetaDto {
   @IsOptional()
   @IsString()
@@ -16,12 +32,12 @@ export class UpdateRecetaDto {
   @Min(1)
   tiempoPreparacion?: number;
 
-  // Reemplazar la relación de productos (opción 1)
+  // Reemplazar la relación de productos por items (productId + cantidad + unidad)
   @IsOptional()
   @IsArray()
-  @ArrayUnique()
-  @IsUUID('all', { each: true })
-  productoIds?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => ProductoItemDto)
+  productoItems?: ProductoItemDto[];
 
   // Relación con Usuario (autor de la receta)
   @IsOptional()

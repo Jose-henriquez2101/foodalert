@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Receta } from './entities/receta.entity';
+import { RecetaProducto } from './entities/receta-producto.entity';
 import { CreateRecetaDto } from './dto/create-receta.dto';
 import { UpdateRecetaDto } from './dto/update-receta.dto';
 import { Product } from '../productos/entities/product.entity';
@@ -16,13 +17,16 @@ export class RecetasService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
 
+  @InjectRepository(RecetaProducto)
+  private readonly recetaProductoRepository: Repository<RecetaProducto>,
+
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
   ) {}
 
   // Crear receta — si se pasan productoIds, los vincula
   async create(createRecetaDto: CreateRecetaDto): Promise<Receta> {
-    const { productoIds, usuarioId, ...rest } = createRecetaDto as any;
+  const { productoItems, usuarioId, ...rest } = createRecetaDto as any;
 
     // si se pasa usuarioId, verificar existencia y asignar
     let usuarioEntity: Usuario | undefined = undefined;
@@ -35,23 +39,30 @@ export class RecetasService {
     }
 
     const receta = this.recetaRepository.create({ ...rest, usuario: usuarioEntity });
-  let saved = (await this.recetaRepository.save(receta) as unknown) as Receta;
 
-    if (productoIds && productoIds.length > 0) {
-      const productos = await this.productRepository.find({
-        where: { id: In(productoIds) },
-      });
-
-      if (productos.length !== productoIds.length) {
+    // Si se envían items de productos con cantidad/unidad, validarlos y crear entradas de RecetaProducto
+    if (productoItems && productoItems.length > 0) {
+      const productIds = productoItems.map((it) => it.productId);
+      const productos = await this.productRepository.find({ where: { id: In(productIds) } });
+      if (productos.length !== productIds.length) {
         const foundIds = productos.map((p) => p.id);
-        const missing = productoIds.filter((id) => !foundIds.includes(id));
+        const missing = productIds.filter((id) => !foundIds.includes(id));
         throw new NotFoundException(`Productos no encontrados: ${missing.join(', ')}`);
       }
 
-      saved.productos = productos;
-      saved = await this.recetaRepository.save(saved);
+      const prodMap = new Map(productos.map((p) => [p.id, p]));
+  (receta as any).recetaProductos = productoItems.map((it) => {
+        const rp = this.recetaProductoRepository.create();
+        rp.productId = it.productId;
+        rp.product = prodMap.get(it.productId)!;
+        rp.cantidadUsada = it.cantidadUsada;
+        rp.unidad = it.unidad;
+        return rp;
+      });
     }
 
+    let saved = (await this.recetaRepository.save(receta) as unknown) as Receta;
+    
     if ((saved as any).usuario) delete (saved as any).usuario;
     return saved;
   }
@@ -59,7 +70,7 @@ export class RecetasService {
 
   // Obtener todas las recetas con productos poblados
   async findAll(): Promise<Receta[]> {
-    const all = await this.recetaRepository.find({ relations: ['productos', 'usuario'] });
+    const all = await this.recetaRepository.find({ relations: ['recetaProductos', 'recetaProductos.product', 'usuario'] });
     return all.map((r) => {
       const copy = { ...r } as any;
       if (copy.usuario) delete copy.usuario;
@@ -71,7 +82,7 @@ export class RecetasService {
   async findOne(id: string): Promise<Receta> {
     const receta = await this.recetaRepository.findOne({
       where: { id },
-      relations: ['productos', 'usuario'],
+      relations: ['recetaProductos', 'recetaProductos.product', 'usuario'],
     });
     if (!receta) {
       throw new NotFoundException(`Receta con ID ${id} no encontrada`);
@@ -82,33 +93,40 @@ export class RecetasService {
 
   // Actualizar: reemplaza totalmente los productos relacionados si se envía productoIds
   async update(id: string, updateRecetaDto: UpdateRecetaDto): Promise<Receta> {
-    const receta = await this.findOne(id); // esto carga también productos
+    const receta = await this.findOne(id); // esto carga también recetaProductos
 
-  const { productoIds, usuarioId, ...rest } = updateRecetaDto as any;
+  const { productoItems, usuarioId, ...rest } = updateRecetaDto as any;
   Object.assign(receta, rest);
 
-    // Si llega productoIds: reemplazamos la relación por completo (opción 1)
-    if (productoIds) {
-      if (!Array.isArray(productoIds)) {
-        throw new BadRequestException('productoIds debe ser un array de UUIDs');
+    // Si llegan productoItems: reemplazamos la relación por completo
+    if (productoItems) {
+      if (!Array.isArray(productoItems)) {
+        throw new BadRequestException('productoItems debe ser un array de items');
       }
-      if (productoIds.length === 0) {
+      if (productoItems.length === 0) {
         // si envían array vacío, removemos todas las relaciones
-        receta.productos = [];
+        (receta as any).recetaProductos = [];
         return await this.recetaRepository.save(receta);
       }
 
-      const productos = await this.productRepository.find({
-        where: { id: In(productoIds) },
-      });
+      const productIds = productoItems.map((it) => it.productId);
+      const productos = await this.productRepository.find({ where: { id: In(productIds) } });
 
-      if (productos.length !== productoIds.length) {
+      if (productos.length !== productIds.length) {
         const foundIds = productos.map((p) => p.id);
-        const missing = productoIds.filter((id) => !foundIds.includes(id));
+        const missing = productIds.filter((id) => !foundIds.includes(id));
         throw new NotFoundException(`Productos no encontrados: ${missing.join(', ')}`);
       }
 
-      receta.productos = productos;
+      const prodMap = new Map(productos.map((p) => [p.id, p]));
+  (receta as any).recetaProductos = productoItems.map((it) => {
+        const rp = this.recetaProductoRepository.create();
+        rp.productId = it.productId;
+        rp.product = prodMap.get(it.productId)!;
+        rp.cantidadUsada = it.cantidadUsada;
+        rp.unidad = it.unidad;
+        return rp;
+      });
     }
 
     // manejar cambio de propietario (usuario)

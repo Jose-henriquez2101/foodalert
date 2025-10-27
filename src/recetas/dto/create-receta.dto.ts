@@ -1,4 +1,19 @@
-import { IsString, MinLength, IsOptional, IsArray, IsNumber, Min, IsUUID, ArrayUnique } from 'class-validator';
+import { IsString, MinLength, IsOptional, IsArray, IsNumber, Min, IsUUID, ArrayUnique, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class ProductoItemDto {
+  @IsUUID()
+  productId: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  cantidadUsada?: number;
+
+  @IsOptional()
+  @IsString()
+  unidad?: string;
+}
 
 export class CreateRecetaDto {
   @IsString()
@@ -14,12 +29,12 @@ export class CreateRecetaDto {
   @Min(1)
   tiempoPreparacion?: number;
 
-  // IDs opcionales para la relación ManyToMany con productos
+  // Items opcionales para la relación con productos (id + cantidad + unidad)
   @IsOptional()
   @IsArray()
-  @ArrayUnique()
-  @IsUUID('all', { each: true })
-  productoIds?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => ProductoItemDto)
+  productoItems?: ProductoItemDto[];
 
   // Relación con Usuario (autor de la receta)
   @IsOptional()

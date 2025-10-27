@@ -1,6 +1,7 @@
 import { Categoria } from 'src/categorias/entities/categoria.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
+import { RecetaProducto } from '../../recetas/entities/receta-producto.entity';
 
 @Entity()
 export class Product {
@@ -28,6 +29,9 @@ export class Product {
 
   @Column({ nullable: true })
   usuarioId?: string;
+
+  @OneToMany(() => RecetaProducto, (rp) => rp.product)
+  recetaProductos?: RecetaProducto[];
 
   @Column()
   fechaCaducidad: number;
