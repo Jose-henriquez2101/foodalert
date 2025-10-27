@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, JoinTable,} from 'typeorm';
+import { Product } from '../../productos/entities/product.entity';
 
 @Entity()
 export class Receta {
@@ -22,5 +23,14 @@ export class Receta {
   tiempoPreparacion?: number;
 
   @CreateDateColumn()
-  fechaCreacion: Date;a
+  fechaCreacion: Date;
+
+  // Relación ManyToMany opcional con Product
+  @ManyToMany(() => Product, { nullable: true })
+  @JoinTable({
+    name: 'recetas_productos',
+    joinColumn: { name: 'recetaId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'productId', referencedColumnName: 'id' },
+  })
+  productos?: Product[];
 }
