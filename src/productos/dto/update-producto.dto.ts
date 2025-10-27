@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, MinLength, Min, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsNumber, MinLength, Min, IsEnum, IsUUID } from 'class-validator';
 
 export class UpdateProductoDto {
   @IsOptional()
@@ -26,4 +26,8 @@ export class UpdateProductoDto {
   @IsOptional()
   @IsEnum(['vigente', 'proximo_a_vencer', 'caducado'])
   readonly estado?: 'vigente' | 'proximo_a_vencer' | 'caducado';
+
+  @IsOptional()
+  @IsUUID()
+  readonly usuarioId?: string;
 }

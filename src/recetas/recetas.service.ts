@@ -5,6 +5,7 @@ import { Receta } from './entities/receta.entity';
 import { CreateRecetaDto } from './dto/create-receta.dto';
 import { UpdateRecetaDto } from './dto/update-receta.dto';
 import { Product } from '../productos/entities/product.entity';
+import { Usuario } from '../usuarios/entities/usuario.entity';
 
 @Injectable()
 export class RecetasService {
@@ -14,13 +15,26 @@ export class RecetasService {
 
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+
+    @InjectRepository(Usuario)
+    private readonly usuarioRepository: Repository<Usuario>,
   ) {}
 
   // Crear receta — si se pasan productoIds, los vincula
   async create(createRecetaDto: CreateRecetaDto): Promise<Receta> {
-    const { productoIds, ...rest } = createRecetaDto as any;
+    const { productoIds, usuarioId, ...rest } = createRecetaDto as any;
 
-    const receta = this.recetaRepository.create(rest);
+    // si se pasa usuarioId, verificar existencia y asignar
+    let usuarioEntity: Usuario | undefined = undefined;
+    if (usuarioId) {
+      const usuarioFound = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
+      if (!usuarioFound) {
+        throw new NotFoundException(`Usuario con id "${usuarioId}" no existe`);
+      }
+      usuarioEntity = usuarioFound;
+    }
+
+    const receta = this.recetaRepository.create({ ...rest, usuario: usuarioEntity });
     let saved = (await this.recetaRepository.save(receta) as unknown) as Receta;
 
     if (productoIds && productoIds.length > 0) {
@@ -35,23 +49,23 @@ export class RecetasService {
       }
 
       saved.productos = productos;
-      saved = await this.recetaRepository.save(saved); 
+      saved = await this.recetaRepository.save(saved);
     }
 
-    return saved; 
+    return saved;
   }
 
 
   // Obtener todas las recetas con productos poblados
   async findAll(): Promise<Receta[]> {
-    return await this.recetaRepository.find({ relations: ['productos'] });
+    return await this.recetaRepository.find({ relations: ['productos', 'usuario'] });
   }
 
   // Obtener una receta por id con productos poblados
   async findOne(id: string): Promise<Receta> {
     const receta = await this.recetaRepository.findOne({
       where: { id },
-      relations: ['productos'],
+      relations: ['productos', 'usuario'],
     });
     if (!receta) {
       throw new NotFoundException(`Receta con ID ${id} no encontrada`);
@@ -63,8 +77,8 @@ export class RecetasService {
   async update(id: string, updateRecetaDto: UpdateRecetaDto): Promise<Receta> {
     const receta = await this.findOne(id); // esto carga también productos
 
-    const { productoIds, ...rest } = updateRecetaDto as any;
-    Object.assign(receta, rest);
+  const { productoIds, usuarioId, ...rest } = updateRecetaDto as any;
+  Object.assign(receta, rest);
 
     // Si llega productoIds: reemplazamos la relación por completo (opción 1)
     if (productoIds) {
@@ -88,6 +102,20 @@ export class RecetasService {
       }
 
       receta.productos = productos;
+    }
+
+    // manejar cambio de propietario (usuario)
+    if (usuarioId !== undefined) {
+      if (usuarioId === null) {
+        (receta as any).usuario = null;
+        (receta as any).usuarioId = null;
+      } else {
+        const usuarioFound = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
+        if (!usuarioFound) {
+          throw new NotFoundException(`Usuario con id "${usuarioId}" no existe`);
+        }
+        (receta as any).usuario = usuarioFound;
+      }
     }
 
     return await this.recetaRepository.save(receta);

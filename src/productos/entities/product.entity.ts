@@ -1,5 +1,6 @@
 import { Categoria } from 'src/categorias/entities/categoria.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Usuario } from '../../usuarios/entities/usuario.entity';
 
 @Entity()
 export class Product {
@@ -17,6 +18,13 @@ export class Product {
 
   @ManyToOne(() => Categoria, categoria => categoria.productos)
   categoria: Categoria;
+
+  @ManyToOne(() => Usuario, (usuario) => usuario.productos, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'usuarioId' })
+  usuario?: Usuario;
+
+  @Column({ nullable: true })
+  usuarioId?: string;
 
   @Column()
   fechaCaducidad: number;

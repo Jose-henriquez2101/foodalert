@@ -6,11 +6,14 @@ export class UpdateCategoriaDto {
 
     @IsUUID()
     @IsOptional()
-    @IsString()
     readonly id?: string;
 
     @IsString()
     @IsOptional()
     readonly nombre?: string;
+
+    @IsOptional()
+    @IsUUID()
+    readonly usuarioId?: string;
 
 }

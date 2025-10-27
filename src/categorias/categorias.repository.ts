@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 import { Categoria } from "./entities/categoria.entity";
 import { CreateCategoriaDto } from "./dto/create-categoria.dto";
 import { UpdateCategoriaDto } from "./dto/update-categoria.dto";
+import { Usuario } from '../usuarios/entities/usuario.entity';
 
 @Injectable()
 export class CategoriaRepository {
@@ -23,14 +24,45 @@ export class CategoriaRepository {
     }
     async create(createCategoriaDto: CreateCategoriaDto): Promise<Categoria> {
         //TypeORM ya genera el UUID automáticamente
-        const newCategoria = this.categoriaRepo.create(createCategoriaDto);
-        return this.categoriaRepo.save(newCategoria);
+        const { usuarioId, ...resto } = createCategoriaDto as any;
+        const newCategoria = this.categoriaRepo.create(resto as any);
+
+        if (usuarioId) {
+            // buscar usuario y asignar relación
+            const usuarioRepo = (this.categoriaRepo.manager.connection as any).getRepository(Usuario) as Repository<Usuario>;
+            const usuario = await usuarioRepo.findOne({ where: { id: usuarioId } });
+            if (!usuario) {
+                throw new NotFoundException(`Usuario con ID ${usuarioId} no encontrado`);
+            }
+            (newCategoria as any).usuario = usuario;
+            (newCategoria as any).usuarioId = usuarioId;
+        }
+
+    const saved = await this.categoriaRepo.save(newCategoria as any);
+    return saved as Categoria;
     }
     async update(id: string, updateCategoriaDto: UpdateCategoriaDto): Promise<Categoria> {
         const categoria = await this.findOneById(id);
         //merge datos nuevos con los anteriores
-        const updatedCategoria = this.categoriaRepo.merge(categoria, updateCategoriaDto);
-        return this.categoriaRepo.save(updatedCategoria);
+        const { usuarioId, ...resto } = updateCategoriaDto as any;
+        if (usuarioId !== undefined) {
+            if (usuarioId === null) {
+                (categoria as any).usuario = null;
+                (categoria as any).usuarioId = null;
+            } else {
+                const usuarioRepo = (this.categoriaRepo.manager.connection as any).getRepository(Usuario) as Repository<Usuario>;
+                const usuario = await usuarioRepo.findOne({ where: { id: usuarioId } });
+                if (!usuario) {
+                    throw new NotFoundException(`Usuario con ID ${usuarioId} no encontrado`);
+                }
+                (categoria as any).usuario = usuario;
+                (categoria as any).usuarioId = usuarioId;
+            }
+        }
+
+    const updatedCategoria = this.categoriaRepo.merge(categoria, resto);
+    const savedUpdated = await this.categoriaRepo.save(updatedCategoria as any);
+    return savedUpdated as Categoria;
     }
     async delete(id: string): Promise<void> {
         const categoria = await this.findOneById(id);
