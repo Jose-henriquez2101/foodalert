@@ -4,6 +4,7 @@ import { Product } from '../productos/entities/product.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { Receta } from '../recetas/entities/receta.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Categoria } from 'src/categorias/entities/categoria.entity';
 
 @Injectable()
 export class SeedService {
@@ -30,6 +31,22 @@ export class SeedService {
     const usuarioRepo = this.dataSource.getRepository(Usuario);
     const recetaRepo = this.dataSource.getRepository(Receta);
 
+    
+    // -------------------- CATEGORÍAS --------------------
+    const nombresCategorias = ['Cereales', 'Lácteos', 'Panadería', 'Aceites', 'Dulces', 'Proteínas', 'Verduras'];
+
+    const categoriasMap = new Map<string, Categoria>();
+    const categoriaRepo = this.dataSource.getRepository(Categoria);
+
+    for (const nombre of nombresCategorias) {
+      let categoria = await categoriaRepo.findOne({ where: { nombre } });
+      if (!categoria) {
+        categoria = categoriaRepo.create({ nombre });
+        await categoriaRepo.save(categoria);
+      }
+      categoriasMap.set(nombre, categoria);
+    }
+    
     // -------------------- PRODUCTOS --------------------
     const productos = [
       { nombre: 'Arroz', cantidad: 50, unidadMedida: 'kg', categoria: 'Cereales', fechaCaducidad: 20251201 },
@@ -42,12 +59,17 @@ export class SeedService {
       { nombre: 'Tomate', cantidad: 100, unidadMedida: 'kg', categoria: 'Verduras', fechaCaducidad: 20251006 },
     ];
 
-    for (const p of productos) {
+        for (const p of productos) {
       const exists = await productRepo.findOne({ where: { nombre: p.nombre } });
       if (!exists) {
+        const categoriaEntity = categoriasMap.get(p.categoria);
         const producto = productRepo.create({
-          ...p,
           id: uuidv4(),
+          nombre: p.nombre,
+          cantidad: p.cantidad,
+          unidadMedida: p.unidadMedida,
+          categoria: categoriaEntity, // 👈 aquí va la entidad, no string
+          fechaCaducidad: p.fechaCaducidad,
           estado: this.calcularEstado(p.fechaCaducidad),
         });
         await productRepo.save(producto);

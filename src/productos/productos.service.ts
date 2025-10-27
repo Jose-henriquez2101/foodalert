@@ -4,42 +4,59 @@ import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
+import { Categoria } from '../categorias/entities/categoria.entity';
 
 @Injectable()
 export class ProductosService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+
+    @InjectRepository(Categoria)
+    private readonly categoriaRepository: Repository<Categoria>,
   ) {}
 
-  // Crear un producto nuevo
   async create(createProductoDto: CreateProductoDto): Promise<Product> {
-    const producto = this.productRepository.create(createProductoDto);
+    const { categoria, ...resto } = createProductoDto;
+
+    // Buscar la categoría existente (por id o nombre)
+    const categoriaEntity = await this.categoriaRepository.findOne({
+      where: { id: categoria }, // o { nombre: categoria } si mandás el nombre
+    });
+
+    if (!categoriaEntity) {
+      throw new NotFoundException(`La categoría con id/nombre "${categoria}" no existe`);
+    }
+
+    const producto = this.productRepository.create({
+      ...resto,
+      categoria: categoriaEntity,
+    });
+
     return await this.productRepository.save(producto);
   }
 
-  // Obtener todos los productos
   async findAll(): Promise<Product[]> {
-    return await this.productRepository.find();
+    return await this.productRepository.find({ relations: ['categoria'] });
   }
 
-  // Obtener un producto por su ID
   async findOne(id: string): Promise<Product> {
-    const producto = await this.productRepository.findOne({ where: { id } });
+    const producto = await this.productRepository.findOne({
+      where: { id },
+      relations: ['categoria'],
+    });
     if (!producto) {
       throw new NotFoundException(`Producto con ID ${id} no encontrado`);
     }
     return producto;
   }
 
-  // Actualizar un producto
   async update(id: string, updateProductoDto: UpdateProductoDto): Promise<Product> {
-    const producto = await this.findOne(id); // verifica que exista
+    const producto = await this.findOne(id);
     const actualizado = Object.assign(producto, updateProductoDto);
     return await this.productRepository.save(actualizado);
   }
 
-  // Eliminar un producto
   async remove(id: string): Promise<void> {
     const result = await this.productRepository.delete(id);
     if (result.affected === 0) {
