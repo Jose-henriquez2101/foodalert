@@ -1,18 +1,4 @@
-import { IsOptional, IsString, MinLength, IsArray, ValidateNested, IsNumber, Min, IsUUID, ArrayUnique } from 'class-validator';
-import { Type } from 'class-transformer';
-
-export class IngredienteDto {
-  @IsUUID()
-  productId: string;
-
-  @IsNumber()
-  @Min(1)
-  cantidadUsada: number;
-
-  @IsString()
-  unidad: string;
-}
-
+import { IsOptional, IsString, MinLength, IsArray, IsNumber, Min, IsUUID, ArrayUnique } from 'class-validator';
 export class UpdateRecetaDto {
   @IsOptional()
   @IsString()
@@ -23,11 +9,7 @@ export class UpdateRecetaDto {
   @IsString()
   descripcion?: string;
 
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => IngredienteDto)
-  ingredientes?: IngredienteDto[];
+  
 
   @IsOptional()
   @IsNumber()

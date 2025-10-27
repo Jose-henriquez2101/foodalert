@@ -32,21 +32,41 @@ export class SeedService {
     const recetaRepo = this.dataSource.getRepository(Receta);
 
     
+    // -------------------- USUARIOS --------------------
+    const usuarios = [
+      { nombre: 'Sebastián Fierro', email: 'sebastian@test.com', password: '123456' },
+      { nombre: 'Ana Pérez', email: 'ana@test.com', password: '123456' },
+      { nombre: 'Juan Gómez', email: 'juan@test.com', password: '123456' },
+    ];
+
+    const usuariosMap = new Map<string, Usuario>();
+    for (const u of usuarios) {
+      let usuario = await usuarioRepo.findOne({ where: { email: u.email } });
+      if (!usuario) {
+        usuario = usuarioRepo.create(u);
+        usuario = await usuarioRepo.save(usuario);
+      }
+      usuariosMap.set(u.email, usuario);
+    }
+
     // -------------------- CATEGORÍAS --------------------
     const nombresCategorias = ['Cereales', 'Lácteos', 'Panadería', 'Aceites', 'Dulces', 'Proteínas', 'Verduras'];
 
     const categoriasMap = new Map<string, Categoria>();
     const categoriaRepo = this.dataSource.getRepository(Categoria);
 
+    // assign all categories to the first user by default
+    const defaultUsuario = usuariosMap.get('sebastian@test.com');
+
     for (const nombre of nombresCategorias) {
       let categoria = await categoriaRepo.findOne({ where: { nombre } });
       if (!categoria) {
-        categoria = categoriaRepo.create({ nombre });
-        await categoriaRepo.save(categoria);
+        categoria = categoriaRepo.create({ nombre, usuario: defaultUsuario, usuarioId: defaultUsuario?.id });
+        categoria = await categoriaRepo.save(categoria as any);
       }
-      categoriasMap.set(nombre, categoria);
+  categoriasMap.set(nombre, categoria!);
     }
-    
+
     // -------------------- PRODUCTOS --------------------
     const productos = [
       { nombre: 'Arroz', cantidad: 50, unidadMedida: 'kg', categoria: 'Cereales', fechaCaducidad: 20251201 },
@@ -59,52 +79,79 @@ export class SeedService {
       { nombre: 'Tomate', cantidad: 100, unidadMedida: 'kg', categoria: 'Verduras', fechaCaducidad: 20251006 },
     ];
 
-        for (const p of productos) {
+    const productsMap = new Map<string, Product>();
+
+    for (let i = 0; i < productos.length; i++) {
+      const p = productos[i];
       const exists = await productRepo.findOne({ where: { nombre: p.nombre } });
       if (!exists) {
         const categoriaEntity = categoriasMap.get(p.categoria);
+        // assign owners round-robin from usuarios
+        const usuarioList = Array.from(usuariosMap.values());
+        const owner = usuarioList.length > 0 ? usuarioList[i % usuarioList.length] : undefined;
+
         const producto = productRepo.create({
           id: uuidv4(),
           nombre: p.nombre,
           cantidad: p.cantidad,
           unidadMedida: p.unidadMedida,
-          categoria: categoriaEntity, // 👈 aquí va la entidad, no string
+          categoria: categoriaEntity,
+          categoriaId: categoriaEntity?.id,
+          usuario: owner,
+          usuarioId: owner?.id,
           fechaCaducidad: p.fechaCaducidad,
           estado: this.calcularEstado(p.fechaCaducidad),
-        });
-        await productRepo.save(producto);
-      }
-    }
-
-    // -------------------- USUARIOS --------------------
-    const usuarios = [
-      { nombre: 'Sebastián Fierro', email: 'sebastian@test.com', password: '123456' },
-      { nombre: 'Ana Pérez', email: 'ana@test.com', password: '123456' },
-      { nombre: 'Juan Gómez', email: 'juan@test.com', password: '123456' },
-    ];
-
-    for (const u of usuarios) {
-      const exists = await usuarioRepo.findOne({ where: { email: u.email } });
-      if (!exists) {
-        const usuario = usuarioRepo.create(u);
-        await usuarioRepo.save(usuario);
+        } as any);
+        const saved = await productRepo.save(producto as any);
+        productsMap.set(saved.nombre, saved);
+      } else {
+        productsMap.set(exists.nombre, exists);
       }
     }
 
     // -------------------- RECETAS --------------------
-    /*const recetas = [
-      { nombre: 'Café Mocha', descripcion: 'Café con leche y chocolate', ingredientes: 'Café, Leche Entera, Chocolate' },
-      { nombre: 'Tostada Integral', descripcion: 'Pan integral con aguacate', ingredientes: 'Pan de molde, Aguacate' },
-      { nombre: 'Ensalada de Tomate', descripcion: 'Tomates frescos con aceite de oliva', ingredientes: 'Tomate, Aceite de oliva, Sal, Orégano' },
+    const recetas = [
+      {
+        nombre: 'Café Mocha',
+        descripcion: 'Café con leche y chocolate',
+        productoIds: ['Leche Entera', 'Azúcar'],
+      },
+      {
+        nombre: 'Tostada Integral',
+        descripcion: 'Pan integral con aguacate',
+        productoIds: ['Pan de molde'],
+      },
+      {
+        nombre: 'Ensalada de Tomate',
+        descripcion: 'Tomates frescos con aceite de oliva',
+        productoIds: ['Tomate', 'Aceite de oliva'],
+      },
     ];
 
     for (const r of recetas) {
-      const exists = await recetaRepo.findOne({ where: { nombre: r.nombre } });
+      const exists = await recetaRepo.findOne({ where: { nombreReceta: r.nombre } });
       if (!exists) {
-        const receta = recetaRepo.create(r);
-        await recetaRepo.save(receta);
+        // assign owner (use second user if exists)
+        const owner = usuariosMap.get('ana@test.com') ?? Array.from(usuariosMap.values())[0];
+
+        const receta = recetaRepo.create({
+          nombreReceta: r.nombre,
+          descripcion: r.descripcion,
+          usuario: owner,
+          usuarioId: owner?.id,
+        } as any);
+
+        let saved = await recetaRepo.save(receta as any);
+
+        // attach productos relation
+        const productosRelacion = r.productoIds.map((name) => productsMap.get(name)).filter(Boolean);
+        if (productosRelacion.length > 0) {
+          saved.productos = productosRelacion as any;
+          saved = await recetaRepo.save(saved as any);
+        }
       }
-    }*/
+    }
+
 
     console.log('Seed completo: productos, usuarios y recetas insertados correctamente');
   }

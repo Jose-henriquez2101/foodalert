@@ -48,11 +48,18 @@ export class ProductosService {
     } as any;
 
     const saved = await this.productRepository.save(toSave);
+    // don't expose full usuario object in API responses
+    if ((saved as any).usuario) delete (saved as any).usuario;
     return saved as Product;
   }
 
   async findAll(): Promise<Product[]> {
-    return await this.productRepository.find({ relations: ['categoria', 'usuario'] });
+    const all = await this.productRepository.find({ relations: ['categoria', 'usuario'] });
+    return all.map((p) => {
+      const copy = { ...p } as any;
+      if (copy.usuario) delete copy.usuario;
+      return copy as Product;
+    });
   }
 
   async findOne(id: string): Promise<Product> {
@@ -63,6 +70,7 @@ export class ProductosService {
     if (!producto) {
       throw new NotFoundException(`Producto con ID ${id} no encontrado`);
     }
+    if ((producto as any).usuario) delete (producto as any).usuario;
     return producto;
   }
 
@@ -84,7 +92,9 @@ export class ProductosService {
     }
 
     const actualizado = Object.assign(producto, resto);
-    return await this.productRepository.save(actualizado);
+    const saved = await this.productRepository.save(actualizado);
+    if ((saved as any).usuario) delete (saved as any).usuario;
+    return saved;
   }
 
   async remove(id: string): Promise<void> {

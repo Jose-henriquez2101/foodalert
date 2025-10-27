@@ -13,13 +13,6 @@ export class Receta {
   @Column({ nullable: true })
   descripcion?: string;
 
-  @Column('json')
-  ingredientes: {
-    productId: string;
-    cantidadUsada: number;
-    unidad: string;
-  }[];
-
   @Column({ nullable: true })
   tiempoPreparacion?: number;
 

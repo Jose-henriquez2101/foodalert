@@ -35,7 +35,7 @@ export class RecetasService {
     }
 
     const receta = this.recetaRepository.create({ ...rest, usuario: usuarioEntity });
-    let saved = (await this.recetaRepository.save(receta) as unknown) as Receta;
+  let saved = (await this.recetaRepository.save(receta) as unknown) as Receta;
 
     if (productoIds && productoIds.length > 0) {
       const productos = await this.productRepository.find({
@@ -52,13 +52,19 @@ export class RecetasService {
       saved = await this.recetaRepository.save(saved);
     }
 
+    if ((saved as any).usuario) delete (saved as any).usuario;
     return saved;
   }
 
 
   // Obtener todas las recetas con productos poblados
   async findAll(): Promise<Receta[]> {
-    return await this.recetaRepository.find({ relations: ['productos', 'usuario'] });
+    const all = await this.recetaRepository.find({ relations: ['productos', 'usuario'] });
+    return all.map((r) => {
+      const copy = { ...r } as any;
+      if (copy.usuario) delete copy.usuario;
+      return copy as Receta;
+    });
   }
 
   // Obtener una receta por id con productos poblados
@@ -70,6 +76,7 @@ export class RecetasService {
     if (!receta) {
       throw new NotFoundException(`Receta con ID ${id} no encontrada`);
     }
+    if ((receta as any).usuario) delete (receta as any).usuario;
     return receta;
   }
 
@@ -118,7 +125,9 @@ export class RecetasService {
       }
     }
 
-    return await this.recetaRepository.save(receta);
+    const updated = await this.recetaRepository.save(receta);
+    if ((updated as any).usuario) delete (updated as any).usuario;
+    return updated;
   }
 
   // Eliminar receta

@@ -13,13 +13,19 @@ export class CategoriaRepository {
         private readonly categoriaRepo: Repository<Categoria>
     ) {}
     async findAll(): Promise<Categoria[]> {
-        return this.categoriaRepo.find();
+        const all = await this.categoriaRepo.find({ relations: ['usuario'] });
+        return all.map((c) => {
+            const copy = { ...c } as any;
+            if (copy.usuario) delete copy.usuario;
+            return copy as Categoria;
+        });
     }
     async findOneById(id: string): Promise<Categoria> {
-        const categoria = await this.categoriaRepo.findOneBy({ id });
+        const categoria = await this.categoriaRepo.findOne({ where: { id }, relations: ['usuario'] });
         if (!categoria) {
             throw new NotFoundException(`Categoria con ID ${id} no encontrada`);
         }
+        if ((categoria as any).usuario) delete (categoria as any).usuario;
         return categoria;
     }
     async create(createCategoriaDto: CreateCategoriaDto): Promise<Categoria> {
@@ -39,6 +45,7 @@ export class CategoriaRepository {
         }
 
     const saved = await this.categoriaRepo.save(newCategoria as any);
+    if ((saved as any).usuario) delete (saved as any).usuario;
     return saved as Categoria;
     }
     async update(id: string, updateCategoriaDto: UpdateCategoriaDto): Promise<Categoria> {
@@ -62,6 +69,7 @@ export class CategoriaRepository {
 
     const updatedCategoria = this.categoriaRepo.merge(categoria, resto);
     const savedUpdated = await this.categoriaRepo.save(updatedCategoria as any);
+    if ((savedUpdated as any).usuario) delete (savedUpdated as any).usuario;
     return savedUpdated as Categoria;
     }
     async delete(id: string): Promise<void> {
