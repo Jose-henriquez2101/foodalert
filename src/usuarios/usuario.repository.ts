@@ -33,8 +33,10 @@ export class UsuarioRepository {
         return this.usuarioRepo.save(updatedUsuario);
     }
     async delete(id: string): Promise<void> {
-        const usuario = await this.findOneById(id);
-        await this.usuarioRepo.delete(usuario);
+        const result = await this.usuarioRepo.delete(id);
+        if (result.affected === 0) {
+            throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+        }
     }
     async findByEmail(email: string): Promise<Usuario | null> {
         return this.usuarioRepo.findOneBy({ email });

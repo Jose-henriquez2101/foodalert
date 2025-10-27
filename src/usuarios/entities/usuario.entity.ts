@@ -17,12 +17,12 @@ export class Usuario {
     @Column()
     password: string;
 
-    @OneToMany(() => Receta, (receta) => receta.usuario)
+    @OneToMany(() => Receta, (receta) => receta.usuario, { onDelete: 'CASCADE' })
     recetas?: Receta[];
 
-    @OneToMany(() => Product, (product) => product.usuario)
+    @OneToMany(() => Product, (product) => product.usuario, { onDelete: 'CASCADE' })
     productos?: Product[];
 
-    @OneToMany(() => Categoria, (categoria) => categoria.usuario)
+    @OneToMany(() => Categoria, (categoria) => categoria.usuario, { onDelete: 'CASCADE' })
     categorias?: Categoria[];
 }
