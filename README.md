@@ -80,7 +80,7 @@ http://localhost:3000/productos
 * POST /productos
   POSTMAN: (http://localhost:3000/productos)
   Crea un nuevo producto.
-  INPUT (ejemplo):
+  INPUT (ejemplo): Para efectos practicos estos id no son reales, reemplazar por los disponibles
   ```json
   {
     "nombre": "Tomate",
@@ -163,7 +163,7 @@ http://localhost:3000/recetas
 * POST /recetas/:id
     POSTMAN: (http://localhost:3000/recetas)
     Crea una nueva receta
-    INPUT (ejemplo):
+    INPUT (ejemplo): Para efectos practicos estos id no son reales, reemplazar por los disponibles
     ```json
     {
       "nombreReceta": "Arroz con Leche Casero",
@@ -182,7 +182,7 @@ http://localhost:3000/recetas
     Edita una receta existente. Puedes actualizar campos básicos y/o los items de productos.
     - Para actualizar solo campos básicos (nombre, descripcion, tiempoPreparacion): enviar solo esos campos.
     - Para reemplazar productos, enviar `productoItems` (reemplaza la relación completa).
-    INPUT (ejemplo: actualizar productos y datos):
+    INPUT (ejemplo: actualizar productos y datos): Para efectos practicos estos id no son reales, reemplazar por los disponibles
     ```json
     {
       "nombreReceta": "Arroz con Leche Especial",
