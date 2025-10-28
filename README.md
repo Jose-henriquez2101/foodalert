@@ -80,7 +80,48 @@ http://localhost:3000/categorias
 http://localhost:3000/recetas
 ```
 * GET recetas
+    POSTMAN: (http://localhost:3000/categorias)
+    Lista todas las recetas disponibles
+
 * GET(id) recetas
+    POSTMAN: (http://localhost:3000/categorias/ID)
+    Lista una receta por ID
+
 * POST recetas
+    POSTMAN: (http://localhost:3000/recetas)
+    Crea una nueva receta
+    INPUT (ejemplo):
+    ```json
+    {
+      "nombreReceta": "Arroz con Leche Casero",
+      "descripcion": "Postre tradicional de arroz con leche y azúcar",
+      "tiempoPreparacion": 45,
+      "usuarioId": "87e8b694-7f0f-455a-acd7-e9f36792425e",
+      "productoItems": [
+        { "productId": "5a36200f-23b1-4a42-959b-9c7cf35a6697", "cantidadUsada": 0.25, "unidad": "kg" },
+        { "productId": "c61b6ec8-fa15-4769-b9e6-fb81e299831d", "cantidadUsada": 1, "unidad": "litros" }
+      ]
+    }
+    ```
+
 * PATCH recetas
+    POSTMAN: (http://localhost:3000/recetas/ID)
+    Edita una receta existente. Puedes actualizar campos básicos y/o los items de productos.
+    - Para actualizar solo campos básicos (nombre, descripcion, tiempoPreparacion): enviar solo esos campos.
+    - Para reemplazar productos, enviar `productoItems` (reemplaza la relación completa).
+    INPUT (ejemplo: actualizar productos y datos):
+    ```json
+    {
+      "nombreReceta": "Arroz con Leche Especial",
+      "descripcion": "Versión mejorada",
+      "tiempoPreparacion": 40,
+      "productoItems": [
+        { "productId": "5a36200f-23b1-4a42-959b-9c7cf35a6697", "cantidadUsada": 0.3, "unidad": "kg" },
+        { "productId": "ba1e6908-1932-4439-a371-8aeef8149834", "cantidadUsada": 0.15, "unidad": "kg" }
+      ]
+    }
+    ```
+
 * DELETE recetas
+    POSTMAN: (http://localhost:3000/recetas/ID)
+    Elimina una receta por su ID (no elimina los productos en sí, solo la receta y sus asociaciones).
