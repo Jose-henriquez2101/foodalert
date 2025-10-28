@@ -31,20 +31,81 @@ http://localhost:3000/seed
 ```
 http://localhost:3000/usuarios
 ```
-* GET usuarios
-* GET(id) usuarios
-* POST usuarios
-* PATCH usuarios
-* DELETE usuarios
+* GET /usuarios
+  POSTMAN: (http://localhost:3000/usuarios)
+  Lista todos los usuarios existentes.
+
+* GET /usuarios/:id
+  POSTMAN: (http://localhost:3000/usuarios/ID)
+  Obtiene un usuario por su ID.
+
+* POST /usuarios
+  POSTMAN: (http://localhost:3000/usuarios)
+  Crea un nuevo usuario.
+  INPUT (ejemplo):
+  ```json
+  {
+    "nombre": "Usuario Ejemplo",
+    "email": "usuario@ejemplo.com",
+    "password": "contraseña123"
+  }
+  ```
+
+* PATCH /usuarios/:id
+  POSTMAN: (http://localhost:3000/usuarios/ID)
+  Edita un usuario existente. Envía solo los campos que quieras actualizar.
+  INPUT (ejemplo):
+  ```json
+  {
+    "nombre": "Nombre Editado",
+    "email": "nuevo@email.com"
+  }
+  ```
+
+* DELETE /usuarios/:id
+  POSTMAN: (http://localhost:3000/usuarios/ID)
+  Elimina un usuario por su ID.
 
 ```
 http://localhost:3000/productos
 ```
-* GET productos
-* GET(id) productos
-* POST productos
-* PATCH productos
-* DELETE productos
+* GET /productos
+  POSTMAN: (http://localhost:3000/productos)
+  Lista todos los productos disponibles.
+
+* GET /productos/:id
+  POSTMAN: (http://localhost:3000/productos/ID)
+  Obtiene un producto por su ID.
+
+* POST /productos
+  POSTMAN: (http://localhost:3000/productos)
+  Crea un nuevo producto.
+  INPUT (ejemplo):
+  ```json
+  {
+    "nombre": "Tomate",
+    "cantidad": 10,
+    "unidadMedida": "kg",
+    "categoriaId": "9ebdfc9a-d0ed-4a9b-8944-02edd694e187",
+    "usuarioId": "539dfece-6f76-4a19-b1b4-2bbaaf432d5c",
+    "fechaCaducidad": 20251006
+  }
+  ```
+
+* PATCH /productos/:id
+  POSTMAN: (http://localhost:3000/productos/ID)
+  Edita un producto existente. Envía solo los campos a cambiar.
+  INPUT (ejemplo):
+  ```json
+  {
+    "cantidad": 15,
+    "unidadMedida": "kg"
+  }
+  ```
+
+* DELETE /productos/:id
+  POSTMAN: (http://localhost:3000/productos/ID)
+  Elimina un producto por su ID.
 
 ```
 http://localhost:3000/categorias
@@ -91,15 +152,15 @@ http://localhost:3000/categorias
 ```
 http://localhost:3000/recetas
 ```
-* GET recetas
+* GET /recetas
     POSTMAN: (http://localhost:3000/categorias)
     Lista todas las recetas disponibles
 
-* GET(id) recetas
+* GET /recetas/:id
     POSTMAN: (http://localhost:3000/categorias/ID)
     Lista una receta por ID
 
-* POST recetas
+* POST /recetas/:id
     POSTMAN: (http://localhost:3000/recetas)
     Crea una nueva receta
     INPUT (ejemplo):
@@ -116,7 +177,7 @@ http://localhost:3000/recetas
     }
     ```
 
-* PATCH recetas
+* PATCH /recetas/:id
     POSTMAN: (http://localhost:3000/recetas/ID)
     Edita una receta existente. Puedes actualizar campos básicos y/o los items de productos.
     - Para actualizar solo campos básicos (nombre, descripcion, tiempoPreparacion): enviar solo esos campos.
@@ -134,6 +195,6 @@ http://localhost:3000/recetas
     }
     ```
 
-* DELETE recetas
+* DELETE /recetas/:id
     POSTMAN: (http://localhost:3000/recetas/ID)
     Elimina una receta por su ID (no elimina los productos en sí, solo la receta y sus asociaciones).
