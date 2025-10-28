@@ -9,7 +9,7 @@
 ```
 npm i -g @nestjs/cli
 ```
-3. ejecutar
+3. ejecutar el siguiente comando para instalar todas dependencias
 ```
 npm install
 

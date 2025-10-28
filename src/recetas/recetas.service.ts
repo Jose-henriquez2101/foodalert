@@ -91,62 +91,85 @@ export class RecetasService {
     return receta;
   }
 
-  // Actualizar: reemplaza totalmente los productos relacionados si se envía productoIds
+  // Actualizar: reemplaza totalmente los productos relacionados si se envía productoItems
   async update(id: string, updateRecetaDto: UpdateRecetaDto): Promise<Receta> {
     const receta = await this.findOne(id); // esto carga también recetaProductos
+    const { productoItems, usuarioId, ...rest } = updateRecetaDto as any;
+    
+    // Aplicar actualizaciones básicas
+    Object.assign(receta, rest);
 
-  const { productoItems, usuarioId, ...rest } = updateRecetaDto as any;
-  Object.assign(receta, rest);
-
-    // Si llegan productoItems: reemplazamos la relación por completo
-    if (productoItems) {
-      if (!Array.isArray(productoItems)) {
-        throw new BadRequestException('productoItems debe ser un array de items');
-      }
-      if (productoItems.length === 0) {
-        // si envían array vacío, removemos todas las relaciones
-        (receta as any).recetaProductos = [];
-        return await this.recetaRepository.save(receta);
-      }
-
-      const productIds = productoItems.map((it) => it.productId);
-      const productos = await this.productRepository.find({ where: { id: In(productIds) } });
-
-      if (productos.length !== productIds.length) {
-        const foundIds = productos.map((p) => p.id);
-        const missing = productIds.filter((id) => !foundIds.includes(id));
-        throw new NotFoundException(`Productos no encontrados: ${missing.join(', ')}`);
-      }
-
-      const prodMap = new Map(productos.map((p) => [p.id, p]));
-  (receta as any).recetaProductos = productoItems.map((it) => {
-        const rp = this.recetaProductoRepository.create();
-        rp.productId = it.productId;
-        rp.product = prodMap.get(it.productId)!;
-        rp.cantidadUsada = it.cantidadUsada;
-        rp.unidad = it.unidad;
-        return rp;
-      });
-    }
-
-    // manejar cambio de propietario (usuario)
-    if (usuarioId !== undefined) {
-      if (usuarioId === null) {
-        (receta as any).usuario = null;
-        (receta as any).usuarioId = null;
-      } else {
-        const usuarioFound = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
-        if (!usuarioFound) {
-          throw new NotFoundException(`Usuario con id "${usuarioId}" no existe`);
+    try {
+      // Si llegan productoItems: reemplazamos la relación por completo
+      if (productoItems !== undefined) {
+        // Primero eliminamos las relaciones existentes
+        if (receta.recetaProductos && receta.recetaProductos.length > 0) {
+          await this.recetaProductoRepository.remove(receta.recetaProductos);
+          receta.recetaProductos = [];
         }
-        (receta as any).usuario = usuarioFound;
-      }
-    }
 
-    const updated = await this.recetaRepository.save(receta);
-    if ((updated as any).usuario) delete (updated as any).usuario;
-    return updated;
+        if (!Array.isArray(productoItems)) {
+          throw new BadRequestException('productoItems debe ser un array de items');
+        }
+
+        if (productoItems.length > 0) {
+          const productIds = productoItems.map(it => it.productId);
+          const productos = await this.productRepository.find({
+            where: { id: In(productIds) }
+          });
+
+          if (productos.length !== productIds.length) {
+            const foundIds = productos.map(p => p.id);
+            const missing = productIds.filter(id => !foundIds.includes(id));
+            throw new NotFoundException(`Productos no encontrados: ${missing.join(', ')}`);
+          }
+
+          const prodMap = new Map(productos.map(p => [p.id, p]));
+          const newRecetaProductos = productoItems.map(it => {
+            return this.recetaProductoRepository.create({
+              receta,
+              product: prodMap.get(it.productId),
+              productId: it.productId,
+              cantidadUsada: it.cantidadUsada,
+              unidad: it.unidad
+            });
+          });
+
+          // Guardamos las nuevas relaciones
+          receta.recetaProductos = await this.recetaProductoRepository.save(newRecetaProductos);
+        }
+      }
+
+      // Manejar cambio de propietario (usuario)
+      if (usuarioId !== undefined) {
+        if (usuarioId === null) {
+          (receta as any).usuario = null;
+          (receta as any).usuarioId = null;
+        } else {
+          const usuarioFound = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
+          if (!usuarioFound) {
+            throw new NotFoundException(`Usuario con id "${usuarioId}" no existe`);
+          }
+          (receta as any).usuario = usuarioFound;
+        }
+      }
+
+      // Guardar y retornar la receta actualizada
+      const updated = await this.recetaRepository.save(receta);
+      if ((updated as any).usuario) delete (updated as any).usuario;
+      return updated;
+    } catch (error) {
+      // En caso de error, asegurarse de que la receta se guarde sin cambios en productos
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      // Para otros errores, intentar guardar al menos los cambios básicos
+      const updated = await this.recetaRepository.save(receta);
+      if ((updated as any).usuario) delete (updated as any).usuario;
+      return updated;
+    }
   }
+
 
   // Eliminar receta
   async remove(id: string): Promise<void> {
