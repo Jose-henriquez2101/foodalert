@@ -49,33 +49,44 @@ http://localhost:3000/productos
 ```
 http://localhost:3000/categorias
 ```
-* GET categorias 
-    POSTMAN: (http://localhost:3000/categorias)
-    Lista todas las categorias disponibles
+* GET /categorias
+* POSTMAN: (http://localhost:3000/categorias
+  )
+  Lista todas las categorías disponibles.
 
-* GET(id) categorias
-    POSTMAN: (http://localhost:3000/categorias/ID)
-    Lista una categoria por ID
+* GET /categorias/:id
+* POSTMAN: (http://localhost:3000/categorias/ID
+  )
+  Obtiene una categoría específica por su ID.
 
-* POST categorias
-    POSTMAN: (http://localhost:3000/categorias)
-    Crea una nueva categoría
-    INPUT:  
-      {
-        "nombre": "nombreCategoria"
-      }
+* POST /categorias
+* POSTMAN: (http://localhost:3000/categorias
+  )
+  Crea una nueva categoría.
 
-* PATCH categorias
-    POSTMAN: (http://localhost:3000/categorias/ID)
-    Edita una categoría existente
-    INPUT:
-      {
-        "nombre": "nombreCategoriaEditado"
-      } 
+* Input:
 
-* DELETE categorias
-    POSTMAN: (http://localhost:3000/categorias/ID)
-    Elimina una categoría por su ID
+  {
+    "nombre": "nombreCategoria"
+  }
+
+
+* PATCH /categorias/:id
+* POSTMAN: (http://localhost:3000/categorias/ID
+  )
+  Edita una categoría existente.
+
+* Input:
+
+  {
+    "nombre": "nombreCategoriaEditado"
+  }
+
+
+* DELETE /categorias/:id
+* POSTMAN: (http://localhost:3000/categorias/ID
+)
+  Elimina una categoría por su ID.
 
 ```
 http://localhost:3000/recetas
