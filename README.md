@@ -68,6 +68,7 @@ http://localhost:3000/categorias
 * PATCH categorias
     POSTMAN: (http://localhost:3000/categorias/ID)
     Edita una categoría existente
+    INPUT:
       {
         "nombre": "nombreCategoriaEditado"
       } 
@@ -75,7 +76,7 @@ http://localhost:3000/categorias
 * DELETE categorias
     POSTMAN: (http://localhost:3000/categorias/ID)
     Elimina una categoría por su ID
-    
+
 ```
 http://localhost:3000/recetas
 ```
