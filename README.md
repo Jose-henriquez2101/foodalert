@@ -110,44 +110,42 @@ http://localhost:3000/productos
 ```
 http://localhost:3000/categorias
 ```
-* GET /categorias
-* POSTMAN: (http://localhost:3000/categorias
-  )
-  Lista todas las categorías disponibles.
+* GET categorias
+    POSTMAN: (http://localhost:3000/categorias)
+    Lista todas las categorías disponibles. 
+    Cada categoría pertenece a un usuario (relación por usuarioId).
 
-* GET /categorias/:id
-* POSTMAN: (http://localhost:3000/categorias/ID
-  )
-  Obtiene una categoría específica por su ID.
+* GET(id) categorias
+    POSTMAN: (http://localhost:3000/categorias/ID)
+    Lista una categoría por ID, incluyendo su relación con el usuario correspondiente.
 
-* POST /categorias
-* POSTMAN: (http://localhost:3000/categorias
-  )
-  Crea una nueva categoría.
+* POST categorias
+    POSTMAN: (http://localhost:3000/categorias)
+    Crea una nueva categoría asociada a un usuario existente.
+    El campo "usuarioId" es opcional, pero si se envía debe corresponder a un usuario válido.
+    INPUT (ejemplo):
+    ```json
+    {
+      "nombre": "Bebidas",
+      "usuarioId": "7e8b26c7-de74-449e-afdb-12a7f1eb9764"
+    }
+    ```
 
-* Input:
+* PATCH categorias
+    POSTMAN: (http://localhost:3000/categorias/ID)
+    Edita una categoría existente. Se pueden actualizar campos básicos (nombre, usuarioId).
+    INPUT (ejemplo):
+    ```json
+    {
+      "nombre": "Bebidas Naturales",
+      "usuarioId": "87e8b694-7f0f-455a-acd7-e9f36792425e"
+    }
+    ```
 
-  {
-    "nombre": "nombreCategoria"
-  }
+* DELETE categorias
+    POSTMAN: (http://localhost:3000/categorias/ID)
+    Elimina una categoría por su ID. 
 
-
-* PATCH /categorias/:id
-* POSTMAN: (http://localhost:3000/categorias/ID
-  )
-  Edita una categoría existente.
-
-* Input:
-
-  {
-    "nombre": "nombreCategoriaEditado"
-  }
-
-
-* DELETE /categorias/:id
-* POSTMAN: (http://localhost:3000/categorias/ID
-)
-  Elimina una categoría por su ID.
 
 ```
 http://localhost:3000/recetas
