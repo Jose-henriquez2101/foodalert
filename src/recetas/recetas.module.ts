@@ -6,10 +6,12 @@ import { Receta } from './entities/receta.entity';
 import { RecetaProducto } from './entities/receta-producto.entity';
 import { Product } from 'src/productos/entities/product.entity'; // <-- IMPORTANTE
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
+import { UsuariosModule } from 'src/usuarios/usuarios.module';
 
 @Module({
   imports: [
-  TypeOrmModule.forFeature([Receta, RecetaProducto, Product, Usuario]),  // ← NECESARIO PARA USAR REPOSITORIOS
+  TypeOrmModule.forFeature([Receta, RecetaProducto, Product, Usuario]),
+  UsuariosModule
   ],
   controllers: [RecetasController],
   providers: [RecetasService],

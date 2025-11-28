@@ -6,9 +6,10 @@ import { Categoria } from './entities/categoria.entity';
 import { CategoriaRepository } from './categorias.repository';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import { Product } from 'src/productos/entities/product.entity';
+import { UsuariosModule } from 'src/usuarios/usuarios.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Categoria, Usuario])],
+  imports: [TypeOrmModule.forFeature([Categoria, Usuario]), UsuariosModule],
   controllers: [CategoriasController],
   providers: [CategoriasService, CategoriaRepository],
   exports: [CategoriasService, CategoriaRepository],
