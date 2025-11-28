@@ -26,7 +26,7 @@ http://localhost:3000/seed
 ```
 http://localhost:3000/usuarios/login
 ```
-7. Con el token de autorizacion y colocarlo en "Authorization" y "Bearer Token" se puede acceder a las rutas de crear, actualizar y eliminar recetas, crear, actualizar y eliminar categoria, y crear, actualizar y eliminar productos.
+7. Con el token de autorizacion y colocarlo en "Authorization" y "Bearer Token" para estar "logeado", se puede acceder a las rutas de crear, actualizar y eliminar de categorias, recetas y productos
 
 ## stack usado
 * PostgreSQL
@@ -205,25 +205,3 @@ http://localhost:3000/recetas
     POSTMAN: (http://localhost:3000/recetas/ID)
     Elimina una receta por su ID (no elimina los productos en sí, solo la receta y sus asociaciones).
 
-* POST /auth/register
-    POSTMAN: (http://localhost:3000/auth/register)
-    Crea un nuevo usuario y retorna un token JWT válido por 2 horas.
-    INPUT: (ejemplo)
-    ```json
-    {
-      "nombre": "Usuario Ejemplo",
-      "email": "usuario@ejemplo.com",
-      "password": "contraseña123"
-    }
-    ```
-
-  * POST /auth/login
-    POSTMAN: (http://localhost:3000/auth/login)
-    Permite que un usuario existente inicie sesión.
-    INPUT: (ejemplo)
-    ```json
-    {
-      "email": "usuario@ejemplo.com",
-      "password": "contraseña123"
-    }
-    ```
