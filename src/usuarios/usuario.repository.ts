@@ -41,4 +41,10 @@ export class UsuarioRepository {
     async findByEmail(email: string): Promise<Usuario | null> {
         return this.usuarioRepo.findOneBy({ email });
     }
+    async findByEmailWithPassword(email: string): Promise<Usuario | null> {
+        return this.usuarioRepo.findOne({
+            where: { email },
+            select: { id: true, nombre: true, email: true, password: true },
+        });
+    }
 }

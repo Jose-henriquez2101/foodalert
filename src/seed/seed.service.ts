@@ -5,6 +5,7 @@ import { RecetaProducto } from '../recetas/entities/receta-producto.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { Receta } from '../recetas/entities/receta.entity';
 import { v4 as uuidv4 } from 'uuid';
+import * as bcrypt from 'bcrypt';
 import { Categoria } from 'src/categorias/entities/categoria.entity';
 
 @Injectable()
@@ -36,19 +37,26 @@ export class SeedService {
     
     // -------------------- USUARIOS --------------------
     const usuarios = [
-      { nombre: 'Sebastián Fierro', email: 'sebastian@test.com', password: '123456' },
-      { nombre: 'Ana Pérez', email: 'ana@test.com', password: '123456' },
-      { nombre: 'Juan Gómez', email: 'juan@test.com', password: '123456' },
+      { nombre: 'Sebastián Fierro', email: 'sebastian@test.com', password: '123456', roles: ['admin'], isActive: true },
+      { nombre: 'Ana Pérez', email: 'ana@test.com', password: '123456', roles: ['user'], isActive: true },
+      { nombre: 'Juan Gómez', email: 'juan@test.com', password: '123456', roles: ['user'], isActive: true },
     ];
 
-    const usuariosMap = new Map<string, Usuario>();
+    const usuariosMap = new Map<string, any>();
     for (const u of usuarios) {
       let usuario = await usuarioRepo.findOne({ where: { email: u.email } });
       if (!usuario) {
-        usuario = usuarioRepo.create(u);
-        usuario = await usuarioRepo.save(usuario);
+        const hashed = bcrypt.hashSync(u.password, 10);
+        const toSave = {
+          nombre: u.nombre,
+          email: u.email,
+          password: hashed,
+          roles: u.roles,
+          isActive: u.isActive,
+        };
+        usuario = await usuarioRepo.save(toSave as any);
       }
-      usuariosMap.set(u.email, usuario);
+      usuariosMap.set(u.email, usuario!);
     }
 
     // -------------------- CATEGORÍAS --------------------

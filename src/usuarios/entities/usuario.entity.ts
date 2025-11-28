@@ -17,6 +17,12 @@ export class Usuario {
     @Column()
     password: string;
 
+    @Column({ default: true })
+    isActive: boolean;
+
+    @Column('simple-array', { default: 'user' })
+    roles: string[];
+
     @OneToMany(() => Receta, (receta) => receta.usuario, { onDelete: 'CASCADE' })
     recetas?: Receta[];
 
