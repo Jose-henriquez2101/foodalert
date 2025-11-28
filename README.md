@@ -22,11 +22,11 @@ docker-compose up -d
 ```
 http://localhost:3000/seed
 ```
-6. Ingresar al login en la siguiente ruta para obtener el token de autorización con el usuario (con el rol admin o user), ejemplo email: "sebastian@test.com" password: "123456"
+6. Ingresar al login en postman con la siguiente ruta para obtener el token de autorización con el usuario (con el rol admin o user), ejemplo email: "sebastian@test.com" password: "123456"
 ```
 http://localhost:3000/usuarios/login
 ```
-7. Con el token de autorizacin se puede acceder a las rutas de recetas y productos.
+7. Con el token de autorizacion y colocarlo en "Authorization" y "Bearer Token" se puede acceder a las rutas de crear, actualizar y eliminar recetas, crear, actualizar y eliminar categoria, y crear, actualizar y eliminar productos.
 
 ## stack usado
 * PostgreSQL
