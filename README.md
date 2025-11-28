@@ -26,7 +26,7 @@ http://localhost:3000/seed
 ```
 http://localhost:3000/usuarios/login
 ```
-7. Con el token de autorizacion y colocarlo en "Authorization" y "Bearer Token" se puede acceder a las rutas de crear, actualizar y eliminar recetas, crear, actualizar y eliminar categoria, y crear, actualizar y eliminar productos.
+7. Con el token de autorizacion y colocarlo en "Authorization" y "Bearer Token" para estar "logeado", se puede acceder a las rutas de crear, actualizar y eliminar de categorias, recetas y productos
 
 ## stack usado
 * PostgreSQL
