@@ -23,6 +23,12 @@ docker-compose up -d
 http://localhost:3000/seed
 ```
 6. Ingresar al login en postman con la siguiente ruta para obtener el token de autorización con el usuario (con el rol admin o user), ejemplo email: "sebastian@test.com" password: "123456"
+```json
+{
+  "email": "sebastian@test.com",
+  "password": "123456"
+}
+```
 ```
 http://localhost:3000/usuarios/login
 ```
