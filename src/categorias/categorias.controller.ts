@@ -2,12 +2,16 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CategoriasService } from './categorias.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { UserRoleGuard } from '../usuarios/guards/user-role.guard';
+import { UseGuards } from '@nestjs/common';
 
 @Controller('categorias')
 export class CategoriasController {
   constructor(private readonly categoriasService: CategoriasService) {}
 
   @Post()
+  @UseGuards(AuthGuard(), UserRoleGuard)
   create(@Body() createCategoriaDto: CreateCategoriaDto) {
     return this.categoriasService.create(createCategoriaDto);
   }
@@ -23,11 +27,13 @@ export class CategoriasController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard(), UserRoleGuard)
   update(@Param('id') id: string, @Body() updateCategoriaDto: UpdateCategoriaDto) {
     return this.categoriasService.update(id, updateCategoriaDto);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard(), UserRoleGuard)
   remove(@Param('id') id: string) {
     return this.categoriasService.remove(id);
   }
